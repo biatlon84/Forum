@@ -1,4 +1,4 @@
-package com.newton.moex.moex_access2.pojo;
+package com.newton.moex.access.pojo;
 
 public class data {
 	private String ticker;

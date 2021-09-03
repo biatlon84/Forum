@@ -1,4 +1,4 @@
-package com.newton.moex.moex_access2.controller;
+package com.newton.moex.access.controller;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
