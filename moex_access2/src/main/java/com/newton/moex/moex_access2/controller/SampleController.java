@@ -16,56 +16,48 @@
 
 package com.newton.moex.moex_access2.controller;
 
-import java.util.Arrays;
+import java.io.IOException;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.bind.annotation.RestController;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
-import com.newton.moex.moex_access2.pojo.document;
+import com.newton.moex.moex_access2.pojo.Resp;
 
-@Controller
+@RestController
 public class SampleController {
-	// private static final String template = "Hello, %s!";
-	String uri = "";
+	String request = "";
 
-	// @Autowired
-	RestTemplate restTemplate = new RestTemplate();
-
-	@GetMapping("/")
+	@GetMapping(path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Greeting sayHello(@RequestParam(name = "name", required = false, defaultValue = "MOEX") String name) {
+	public Resp getLast(@RequestParam(name = "SECID", required = false, defaultValue = "MOEX") String ticker) {
 
-		String ticker = name;
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder;
+		Document res = null;
+		String last = null;
+		request = "https://iss.moex.com/iss/engines/stock/markets/shares/boards/tqbr/securities/" + ticker
+				+ ".xml?iss.meta=off";
+		try {
+			builder = factory.newDocumentBuilder();
+			res = builder.parse(request);
+			last = res.getDocumentElement().getElementsByTagName("row").item(1).getAttributes().getNamedItem("LAST")
+					.getNodeValue();
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+		// System.out.println(res.getDocumentElement().getElementsByTagName("row").item(1).getAttributes()
+		// .getNamedItem("LAST").getNodeValue());
 
-		// uri =
-		// "https://iss.moex.com/iss/engines/stock/markets/shares/boards/tqbr/securities/"
-		// + ticker
-		// + ".xml?iss.meta=off";
-
-		uri = "https://iss.moex.com/iss/engines/stock/markets/shares/boards/tqbr/securities/" + ticker;
-
-		HttpHeaders headers = new HttpHeaders();
-
-		headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_XML }));
-		// Request to return XML format
-		headers.setContentType(MediaType.APPLICATION_XML);
-		headers.set("iss.meta", "off");
-
-		HttpEntity<document> entity = new HttpEntity<document>(headers);
-
-		ResponseEntity<document> roott = restTemplate.exchange(uri, HttpMethod.GET, entity, document.class);
-		// XmlMapper xmlMapper = new XmlMapper();
-		document res = roott.getBody();
-		System.out.print(res.data.get(1).rows.rowu.LAST);
-		double last = res.data.get(0).rows.rowu.LAST;
-		return new Greeting(0, Double.toString(last));
+		return new Resp(res.getDocumentElement().getElementsByTagName("row").item(1).getAttributes()
+				.getNamedItem("SECID").getNodeValue(), last);
 	}
 }

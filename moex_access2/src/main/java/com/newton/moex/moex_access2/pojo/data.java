@@ -1,7 +1,21 @@
 package com.newton.moex.moex_access2.pojo;
 
 public class data {
-	// public rows rows;
-	public rows rows;
-	public String id;
+	private String ticker;
+	private String lastPrice;
+
+	public data(String ticker, String lastPrice) {
+		super();
+		this.ticker = ticker;
+		this.lastPrice = lastPrice;
+	}
+
+	public String getTicker() {
+		return ticker;
+	}
+
+	public String getLastPrice() {
+		return lastPrice;
+	}
+
 }
